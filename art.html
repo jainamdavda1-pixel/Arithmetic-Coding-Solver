@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arithmetic Coding Solver</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: #e2e8f0;
+  text-align: center;
+  padding: 20px;
+}
+.container {
+  max-width: 900px;
+  margin: auto;
+  background: #1e293b;
+  padding: 20px;
+  border-radius: 12px;
+}
+input, button {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  width: 80%;
+}
+button {
+  background: #38bdf8;
+  color: black;
+  cursor: pointer;
+}
+button:hover {
+  background: #0ea5e9;
+}
+.result {
+  margin-top: 20px;
+  text-align: left;
+  background: #020617;
+  padding: 15px;
+  border-radius: 8px;
+}
+.bar-container {
+  margin: 10px 0;
+}
+.bar {
+  height: 25px;
+  background: #22c55e;
+  position: relative;
+}
+.bar-label {
+  position: absolute;
+  left: 5px;
+  top: 3px;
+  font-size: 12px;
+  color: black;
+}
+.scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Arithmetic Coding Solver (With Diagram)</h1>
+  
+  <p>Enter symbols and probabilities (format: a:0.2,e:0.3,...)</p>
+  <input id="probInput" placeholder="a:0.2,e:0.3,i:0.1,o:0.2,u:0.2">
+  
+  <p>Enter message</p>
+  <input id="messageInput" placeholder="eaii">
+  
+  <button onclick="solve()">Solve</button>
+  
+  <div class="result" id="output"></div>
+  <div id="diagram"></div>
+</div>
+
+<script>
+function solve() {
+  const probStr = document.getElementById("probInput").value;
+  const message = document.getElementById("messageInput").value;
+  const output = document.getElementById("output");
+  const diagram = document.getElementById("diagram");
+  
+  let probs = {};
+  probStr.split(",").forEach(p => {
+    let [symbol, value] = p.split(":");
+    probs[symbol.trim()] = parseFloat(value);
+  });
+  
+  let symbols = Object.keys(probs).sort();
+  let ranges = {};
+  let cumulative = 0;
+  
+  symbols.forEach(sym => {
+    ranges[sym] = [cumulative, cumulative + probs[sym]];
+    cumulative += probs[sym];
+  });
+  
+  let low = 0, high = 1;
+  let steps = "<b>Steps:</b><br>";
+  diagram.innerHTML = "<h3>Diagram:</h3>";
+  
+  for (let char of message) {
+    let rangeWidth = high - low;
+    let [symLow, symHigh] = ranges[char];
+    
+    let newLow = low + rangeWidth * symLow;
+    let newHigh = low + rangeWidth * symHigh;
+    
+    steps += `Symbol: ${char} → Range [${newLow.toFixed(6)}, ${newHigh.toFixed(6)})<br>`;
+    
+    // Create visual bar
+    let barWidth = (newHigh - newLow) * 100;
+    let barStart = newLow * 100;
+    
+    diagram.innerHTML += `
+      <div class="bar-container">
+        <div class="scale"><span>0</span><span>1</span></div>
+        <div style="background:#334155; height:25px; position:relative;">
+          <div class="bar" style="width:${barWidth}%; margin-left:${barStart}%">
+            <div class="bar-label">${char}</div>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    low = newLow;
+    high = newHigh;
+  }
+  
+  let encoded = (low + high) / 2;
+  
+  output.innerHTML = `
+    <b>Final Range:</b> [${low.toFixed(6)}, ${high.toFixed(6)})<br>
+    <b>Encoded Value:</b> ${encoded.toFixed(6)}<br><br>
+    ${steps}
+  `;
+}
+</script>
+
+</body>
+</html>
