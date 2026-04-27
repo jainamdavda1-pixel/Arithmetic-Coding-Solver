@@ -25,7 +25,7 @@ An interactive web-based tool that demonstrates **Arithmetic Coding** by encodin
 ## 📂 Project Structure
 
 
-index.html (Contains HTML, CSS, and JavaScript)
+art.html (Contains HTML, CSS, and JavaScript)
 
 
 ---
@@ -90,7 +90,7 @@ Message: eaii
 ### Option 1: Run Locally
 Just open:
 
-index.html
+art.html
 
 
 ---
