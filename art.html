@@ -1,148 +1,466 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arithmetic Coding Solver</title>
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #0f172a;
-  color: #e2e8f0;
-  text-align: center;
-  padding: 20px;
-}
-.container {
-  max-width: 900px;
-  margin: auto;
-  background: #1e293b;
-  padding: 20px;
-  border-radius: 12px;
-}
-input, button {
-  margin: 10px;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  width: 80%;
-}
-button {
-  background: #38bdf8;
-  color: black;
-  cursor: pointer;
-}
-button:hover {
-  background: #0ea5e9;
-}
-.result {
-  margin-top: 20px;
-  text-align: left;
-  background: #020617;
-  padding: 15px;
-  border-radius: 8px;
-}
-.bar-container {
-  margin: 10px 0;
-}
-.bar {
-  height: 25px;
-  background: #22c55e;
-  position: relative;
-}
-.bar-label {
-  position: absolute;
-  left: 5px;
-  top: 3px;
-  font-size: 12px;
-  color: black;
-}
-.scale {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arithmetic Coding Solver</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --panel-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --border: #334155;
+            --success: #22c55e;
+            --error: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+            font-weight: 700;
+            font-size: 2.2rem;
+            color: var(--text-main);
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 24px;
+        }
+
+        label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        input {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 14px 16px;
+            border-radius: 10px;
+            font-size: 1.05rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+            background: #0f172a;
+        }
+
+        button {
+            background: var(--accent);
+            color: #0f172a;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 16px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -10px rgba(56, 189, 248, 0.5);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        th,
+        td {
+            padding: 14px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: rgba(15, 23, 42, 0.8);
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .step-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 24px;
+            transition: transform 0.2s;
+        }
+
+        .step-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .step-range {
+            font-family: 'ui-monospace', 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+            font-size: 1.05rem;
+            color: var(--accent);
+            background: rgba(56, 189, 248, 0.1);
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .calculation {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'ui-monospace', 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            line-height: 1.8;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .calculation .highlight {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+
+        .visualization-wrapper {
+            margin-top: 15px;
+        }
+
+        .vis-label {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .visualization-container {
+            width: 100%;
+            height: 48px;
+            background: #1e293b;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .vis-segment {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            position: relative;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .vis-segment:last-child {
+            border-right: none;
+        }
+
+        .vis-segment.active {
+            box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.8), 0 0 15px rgba(255, 255, 255, 0.2);
+            z-index: 10;
+        }
+
+        .error {
+            color: var(--error);
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 16px;
+            border-radius: 10px;
+            margin-bottom: 24px;
+            display: none;
+            font-weight: 500;
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="container">
-  <h1>Arithmetic Coding Solver (With Diagram)</h1>
-  
-  <p>Enter symbols and probabilities (format: a:0.2,e:0.3,...)</p>
-  <input id="probInput" placeholder="a:0.2,e:0.3,i:0.1,o:0.2,u:0.2">
-  
-  <p>Enter message</p>
-  <input id="messageInput" placeholder="eaii">
-  
-  <button onclick="solve()">Solve</button>
-  
-  <div class="result" id="output"></div>
-  <div id="diagram"></div>
-</div>
+    <div class="container">
+        <h1>Arithmetic Coding Solver</h1>
 
-<script>
-function solve() {
-  const probStr = document.getElementById("probInput").value;
-  const message = document.getElementById("messageInput").value;
-  const output = document.getElementById("output");
-  const diagram = document.getElementById("diagram");
-  
-  let probs = {};
-  probStr.split(",").forEach(p => {
-    let [symbol, value] = p.split(":");
-    probs[symbol.trim()] = parseFloat(value);
-  });
-  
-  let symbols = Object.keys(probs).sort();
-  let ranges = {};
-  let cumulative = 0;
-  
-  symbols.forEach(sym => {
-    ranges[sym] = [cumulative, cumulative + probs[sym]];
-    cumulative += probs[sym];
-  });
-  
-  let low = 0, high = 1;
-  let steps = "<b>Steps:</b><br>";
-  diagram.innerHTML = "<h3>Diagram:</h3>";
-  
-  for (let char of message) {
-    let rangeWidth = high - low;
-    let [symLow, symHigh] = ranges[char];
-    
-    let newLow = low + rangeWidth * symLow;
-    let newHigh = low + rangeWidth * symHigh;
-    
-    steps += `Symbol: ${char} → Range [${newLow.toFixed(6)}, ${newHigh.toFixed(6)})<br>`;
-    
-    // Create visual bar
-    let barWidth = (newHigh - newLow) * 100;
-    let barStart = newLow * 100;
-    
-    diagram.innerHTML += `
-      <div class="bar-container">
-        <div class="scale"><span>0</span><span>1</span></div>
-        <div style="background:#334155; height:25px; position:relative;">
-          <div class="bar" style="width:${barWidth}%; margin-left:${barStart}%">
-            <div class="bar-label">${char}</div>
-          </div>
+        <div id="error" class="error"></div>
+
+        <div class="input-group">
+            <label>Symbols and Probabilities (format: a:0.2, e:0.3, i:0.1, o:0.2, u:0.2)</label>
+            <input id="probInput" value="a:0.2, e:0.3, i:0.1, o:0.2, u:0.2" autocomplete="off" spellcheck="false">
         </div>
-      </div>
-    `;
-    
-    low = newLow;
-    high = newHigh;
-  }
-  
-  let encoded = (low + high) / 2;
-  
-  output.innerHTML = `
-    <b>Final Range:</b> [${low.toFixed(6)}, ${high.toFixed(6)})<br>
-    <b>Encoded Value:</b> ${encoded.toFixed(6)}<br><br>
-    ${steps}
-  `;
-}
-</script>
 
+        <div class="input-group">
+            <label>Message to Encode</label>
+            <input id="messageInput" value="eaii" autocomplete="off" spellcheck="false">
+        </div>
+
+        <button onclick="solve()">Solve & Visualize Steps</button>
+
+        <div id="output" style="display: none;">
+            <h2>Probability Model</h2>
+            <table id="probTable">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Probability</th>
+                        <th>Sub-Range [Low, High)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <h2>Step-by-Step Execution</h2>
+            <div id="stepsContainer"></div>
+
+            <div class="step-card"
+                style="border-color: var(--success); background: rgba(34, 197, 94, 0.05); text-align: center; padding: 30px;">
+                <div class="step-title"
+                    style="color: var(--success); font-size: 1.5rem; justify-content: center; margin-bottom: 20px;">
+                    Final Encoding Result</div>
+                <div id="finalResult" style="font-size: 1.2rem; line-height: 2;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function solve() {
+            const errorEl = document.getElementById("error");
+            errorEl.style.display = "none";
+
+            const probStr = document.getElementById("probInput").value;
+            const message = document.getElementById("messageInput").value.trim();
+
+            if (!probStr || !message) {
+                showError("Please provide both probabilities and a message.");
+                return;
+            }
+
+            let probs = {};
+            let totalProb = 0;
+            try {
+                probStr.split(",").forEach(p => {
+                    if (!p.trim()) return;
+                    let parts = p.split(":");
+                    if (parts.length !== 2) throw new Error("Invalid format");
+                    let symbol = parts[0].trim();
+                    let value = parseFloat(parts[1]);
+                    if (isNaN(value) || value <= 0 || value >= 1) throw new Error(`Invalid probability for ${symbol}`);
+                    probs[symbol] = value;
+                    totalProb += value;
+                });
+            } catch (e) {
+                showError("Error parsing probabilities. Ensure format is a:0.2, b:0.8");
+                return;
+            }
+
+            if (Math.abs(totalProb - 1.0) > 0.0001) {
+                showError(`Probabilities must sum to 1. Currently sum to ${totalProb.toFixed(4)}`);
+                return;
+            }
+
+            let symbols = Object.keys(probs).sort();
+
+            for (let char of message) {
+                if (!probs[char]) {
+                    showError(`Message contains symbol '${char}' which is not in the probability model.`);
+                    return;
+                }
+            }
+
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+            let symbolColors = {};
+            symbols.forEach((sym, i) => {
+                symbolColors[sym] = colors[i % colors.length];
+            });
+
+            let ranges = {};
+            let cumulative = 0;
+
+            const tbody = document.querySelector("#probTable tbody");
+            tbody.innerHTML = "";
+
+            symbols.forEach(sym => {
+                let low = cumulative;
+                let high = cumulative + probs[sym];
+                ranges[sym] = [low, high];
+                cumulative = high;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <div style="display:flex; align-items:center;">
+                                <span style="display:inline-block; width:14px; height:14px; background:${symbolColors[sym]}; border-radius:4px; margin-right:10px; box-shadow: 0 0 8px ${symbolColors[sym]}66;"></span>
+                                <strong>${sym}</strong>
+                            </div>
+                        </td>
+                        <td>${probs[sym].toFixed(2)}</td>
+                        <td style="font-family: monospace; color: var(--accent);">[${low.toFixed(4)}, ${high.toFixed(4)})</td>
+                    </tr>
+                `;
+            });
+
+            let low = 0, high = 1;
+            const stepsContainer = document.getElementById("stepsContainer");
+            stepsContainer.innerHTML = "";
+
+            for (let i = 0; i < message.length; i++) {
+                let char = message[i];
+                let prevLow = low;
+                let prevHigh = high;
+                let rangeWidth = prevHigh - prevLow;
+                let [symLow, symHigh] = ranges[char];
+
+                low = prevLow + rangeWidth * symLow;
+                high = prevLow + rangeWidth * symHigh;
+
+                let segmentsHtml = "";
+                symbols.forEach(sym => {
+                    let [sL, sH] = ranges[sym];
+                    let widthPct = (sH - sL) * 100;
+                    let isActive = sym === char;
+
+                    let bg = symbolColors[sym];
+                    let opacity = isActive ? "1" : "0.4";
+                    let textColor = isActive ? "#ffffff" : "rgba(255,255,255,0.5)";
+                    let fontWeight = isActive ? "800" : "400";
+                    let activeClass = isActive ? "active" : "";
+
+                    segmentsHtml += `
+                        <div class="vis-segment ${activeClass}" style="width: ${widthPct}%; background-color: ${bg}; opacity: ${opacity}; color: ${textColor}; font-weight: ${fontWeight};">
+                            ${widthPct >= 4 ? sym : ''}
+                        </div>
+                    `;
+                });
+
+                stepsContainer.innerHTML += `
+                    <div class="step-card">
+                        <div class="step-header">
+                            <div class="step-title">Step ${i + 1}: Encode Symbol '<span style="color: ${symbolColors[char]}">${char}</span>'</div>
+                            <div class="step-range">[${low.toFixed(6)}, ${high.toFixed(6)})</div>
+                        </div>
+                        
+                        <div class="visualization-wrapper">
+                            <div class="vis-label">
+                                <span>Zooming into interval <strong>[${prevLow.toFixed(6)}, ${prevHigh.toFixed(6)})</strong></span>
+                                <span style="color: var(--accent);">Range Width: ${rangeWidth.toFixed(6)}</span>
+                            </div>
+                            <div class="visualization-container">
+                                ${segmentsHtml}
+                            </div>
+                            <div class="vis-label" style="margin-top: 8px; margin-bottom: 20px;">
+                                <span>${prevLow.toFixed(6)}</span>
+                                <span>${prevHigh.toFixed(6)}</span>
+                            </div>
+                        </div>
+
+                        <div class="calculation">
+                            <div><span style="color: var(--text-muted)">Current Width:</span> <span class="highlight">${prevHigh.toFixed(6)} - ${prevLow.toFixed(6)} = ${rangeWidth.toFixed(6)}</span></div>
+                            <div style="margin-top: 8px;"><span style="color: var(--text-muted)">New Low:</span> ${prevLow.toFixed(6)} + (${rangeWidth.toFixed(6)} × ${symLow.toFixed(4)}) = <span class="highlight">${low.toFixed(6)}</span></div>
+                            <div style="margin-top: 4px;"><span style="color: var(--text-muted)">New High:</span> ${prevLow.toFixed(6)} + (${rangeWidth.toFixed(6)} × ${symHigh.toFixed(4)}) = <span class="highlight">${high.toFixed(6)}</span></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            let encoded = (low + high) / 2;
+            document.getElementById("finalResult").innerHTML = `
+                <div style="margin-bottom: 15px;">Final Range: <span style="font-family: monospace; background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 6px;">[${low.toFixed(8)}, ${high.toFixed(8)})</span></div>
+                <div>Encoded Value (Midpoint): <strong style="font-family: monospace; font-size: 1.4rem; color: #fff; background: var(--success); padding: 5px 15px; border-radius: 8px;">${encoded.toFixed(8)}</strong></div>
+            `;
+
+            document.getElementById("output").style.display = "block";
+
+            document.getElementById("output").scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function showError(msg) {
+            const errorEl = document.getElementById("error");
+            errorEl.innerHTML = `<strong>Error:</strong> ${msg}`;
+            errorEl.style.display = "block";
+            document.getElementById("output").style.display = "none";
+        }
+
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                solve();
+            }
+        });
+    </script>
 </body>
+
 </html>
